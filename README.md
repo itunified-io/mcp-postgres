@@ -3,7 +3,7 @@
 [![AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@itunified.io/mcp-postgres)](https://www.npmjs.com/package/@itunified.io/mcp-postgres)
 
-A comprehensive PostgreSQL MCP (Model Context Protocol) server providing 38+ tools for database management, monitoring, and administration.
+A comprehensive PostgreSQL MCP (Model Context Protocol) server providing 40+ tools for database management, monitoring, and administration.
 
 ## Features
 
@@ -45,6 +45,54 @@ export PGDATABASE="mydb"
 export PGSSLMODE="require"  # optional
 ```
 
+### Multi-Database Configuration
+
+Create a config file at `~/.config/mcp-postgres/databases.yaml`:
+
+```yaml
+databases:
+  production:
+    host: db.example.com
+    port: 5432
+    user: admin
+    password: ${DB_PROD_PASSWORD}
+    database: myapp
+    ssl: true
+  staging:
+    host: staging-db.example.com
+    port: 5432
+    user: admin
+    password: ${DB_STAGING_PASSWORD}
+    database: myapp
+default: production
+```
+
+Environment variables in `${VAR_NAME}` syntax are automatically expanded.
+
+Config file discovery order:
+1. `POSTGRES_CONFIG_FILE` env var (explicit path)
+2. `~/.config/mcp-postgres/databases.yaml` or `databases.json`
+3. `POSTGRES_CONNECTION_STRING` env var (single database)
+4. Individual `PG*` env vars (single database)
+
+Override the config path with `POSTGRES_CONFIG_FILE` env var:
+
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["@itunified.io/mcp-postgres"],
+      "env": {
+        "POSTGRES_CONFIG_FILE": "/path/to/databases.yaml"
+      }
+    }
+  }
+}
+```
+
+Use `pg_list_connections` to see all configured databases, `pg_switch_database` to change the active one.
+
 ### Claude Desktop / MCP Settings
 
 Add to your `settings.json`:
@@ -65,13 +113,15 @@ Add to your `settings.json`:
 
 ## Tools
 
-### Connection (3 tools)
+### Connection (5 tools)
 
 | Tool | Description |
 |------|-------------|
-| `pg_connect` | Connect to PostgreSQL instance |
-| `pg_disconnect` | Close connection pool |
-| `pg_connection_status` | Pool health: active/idle/waiting connections |
+| `pg_connect` | Connect to a database (default or named) |
+| `pg_disconnect` | Disconnect from a database or all |
+| `pg_connection_status` | Pool health for active or named database |
+| `pg_list_connections` | List all configured databases and status |
+| `pg_switch_database` | Switch the active database context |
 
 ### Query (3 tools)
 

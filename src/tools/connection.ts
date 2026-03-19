@@ -3,54 +3,122 @@ import type { PostgresClient } from '../client/postgres-client.js';
 export const connectionToolDefinitions = [
   {
     name: 'pg_connect',
-    description: 'Connect to a PostgreSQL instance. Uses POSTGRES_CONNECTION_STRING env var or individual PG* env vars. Call this before using any other pg_* tools.',
+    description:
+      'Connect to a PostgreSQL database. If multiple databases are configured, specify which one. Otherwise connects to the default.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: {
+        database: {
+          type: 'string',
+          description: 'Named database from config file (optional, uses default if omitted)',
+        },
+      },
     },
   },
   {
     name: 'pg_disconnect',
-    description: 'Close the connection pool and disconnect from PostgreSQL.',
+    description: 'Disconnect from a PostgreSQL database. Omit database to disconnect all.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        database: {
+          type: 'string',
+          description: 'Named database to disconnect (omit to disconnect all)',
+        },
+      },
+    },
+  },
+  {
+    name: 'pg_connection_status',
+    description:
+      'Check connection pool health for the active database or a specific named database.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        database: {
+          type: 'string',
+          description: 'Named database (omit for active database)',
+        },
+      },
+    },
+  },
+  {
+    name: 'pg_list_connections',
+    description: 'List all configured databases and their connection status.',
     inputSchema: {
       type: 'object' as const,
       properties: {},
     },
   },
   {
-    name: 'pg_connection_status',
-    description: 'Check connection pool health: connected state, active/idle/waiting connections.',
+    name: 'pg_switch_database',
+    description:
+      'Switch the active database context. All subsequent queries will use this database unless overridden.',
     inputSchema: {
       type: 'object' as const,
-      properties: {},
+      properties: {
+        database: {
+          type: 'string',
+          description: 'Named database to switch to',
+        },
+      },
+      required: ['database'],
     },
   },
 ];
 
 export async function handleConnectionTool(
   name: string,
-  _args: Record<string, unknown>,
+  args: Record<string, unknown>,
   client: PostgresClient,
 ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
   try {
+    const database = typeof args.database === 'string' ? args.database : undefined;
+
     switch (name) {
       case 'pg_connect': {
-        await client.connect();
-        return { content: [{ type: 'text', text: 'Connected to PostgreSQL successfully.' }] };
+        await client.connect(database);
+        const dbName = database ?? client.getActiveDatabase();
+        return {
+          content: [{ type: 'text', text: `Connected to '${dbName}' successfully.` }],
+        };
       }
 
       case 'pg_disconnect': {
-        await client.disconnect();
-        return { content: [{ type: 'text', text: 'Disconnected from PostgreSQL.' }] };
+        await client.disconnect(database);
+        const msg = database
+          ? `Disconnected from '${database}'.`
+          : 'Disconnected from all databases.';
+        return { content: [{ type: 'text', text: msg }] };
       }
 
       case 'pg_connection_status': {
-        const pool = await client.getPoolStatus();
-        const status = {
-          connected: client.isConnected(),
-          pool,
-        };
+        const status = await client.getPoolStatus(database);
         return { content: [{ type: 'text', text: JSON.stringify(status, null, 2) }] };
+      }
+
+      case 'pg_list_connections': {
+        const databases = client.getConfiguredDatabases();
+        const active = client.getActiveDatabase();
+        const statuses = await Promise.all(
+          databases.map(async (db) => {
+            const status = await client.getPoolStatus(db);
+            return { ...status, active: db === active };
+          }),
+        );
+        return { content: [{ type: 'text', text: JSON.stringify(statuses, null, 2) }] };
+      }
+
+      case 'pg_switch_database': {
+        if (!database) {
+          return {
+            content: [{ type: 'text', text: 'Error: database parameter is required.' }],
+          };
+        }
+        client.setActiveDatabase(database);
+        return {
+          content: [{ type: 'text', text: `Switched active database to '${database}'.` }],
+        };
       }
 
       default:
