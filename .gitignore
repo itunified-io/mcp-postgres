@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.nyc_output/
+*.tgz
+.DS_Store
+.env
+.env.*
+!.env.example
