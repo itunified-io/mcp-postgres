@@ -143,6 +143,19 @@ Add to your `settings.json`:
 | `pg_database_size` | Size of all databases |
 | `pg_table_sizes` | Table sizes with index/toast breakdown |
 
+## Enterprise Edition
+
+For advanced PostgreSQL operations, **mcp-postgres-enterprise** extends this server with:
+
+- **CloudNativePG (CNPG)** — K8s cluster management, failover, switchover, backup orchestration
+- **HA Operations** — Replication slot management, PgBouncer pool control
+- **Backup / PITR** — pg_dump/pg_restore orchestration, point-in-time recovery
+- **RBAC** — Role management, privilege grants, row-level security policies
+- **Audit** — Query log analysis, connection audit, permission mapping
+- **Compliance** — SSL enforcement, connection limit checks
+
+Available as a private GitHub package. Contact [itunified.io](https://github.com/sponsors/itunified-io) for access.
+
 ## Security
 
 - All queries use parameterized placeholders (`$1`, `$2`, ...) — no SQL injection risk
