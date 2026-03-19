@@ -1,6 +1,6 @@
 {
   "name": "@itunified.io/mcp-postgres",
-  "version": "2026.3.19.1",
+  "version": "2026.3.19-1",
   "description": "PostgreSQL MCP Server — Full DBA toolkit with 38+ tools for schema, queries, monitoring, replication, and maintenance",
   "type": "module",
   "main": "dist/index.js",
