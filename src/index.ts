@@ -10,7 +10,6 @@ import { connectionToolDefinitions, handleConnectionTool } from './tools/connect
 import { queryToolDefinitions, handleQueryTool } from './tools/query.js';
 import { schemaToolDefinitions, handleSchemaTool } from './tools/schema.js';
 import { crudToolDefinitions, handleCrudTool } from './tools/crud.js';
-import { dbaToolDefinitions, handleDbaTool } from './tools/dba.js';
 import { serverToolDefinitions, handleServerTool } from './tools/server.js';
 import { replicationToolDefinitions, handleReplicationTool } from './tools/replication.js';
 import { databaseToolDefinitions, handleDatabaseTool } from './tools/database.js';
@@ -20,7 +19,6 @@ const allToolDefinitions: Tool[] = ([
   ...queryToolDefinitions,
   ...schemaToolDefinitions,
   ...crudToolDefinitions,
-  ...dbaToolDefinitions,
   ...serverToolDefinitions,
   ...replicationToolDefinitions,
   ...databaseToolDefinitions,
@@ -35,7 +33,6 @@ for (const def of connectionToolDefinitions) toolHandlers.set(def.name, handleCo
 for (const def of queryToolDefinitions) toolHandlers.set(def.name, handleQueryTool);
 for (const def of schemaToolDefinitions) toolHandlers.set(def.name, handleSchemaTool);
 for (const def of crudToolDefinitions) toolHandlers.set(def.name, handleCrudTool);
-for (const def of dbaToolDefinitions) toolHandlers.set(def.name, handleDbaTool);
 for (const def of serverToolDefinitions) toolHandlers.set(def.name, handleServerTool);
 for (const def of replicationToolDefinitions) toolHandlers.set(def.name, handleReplicationTool);
 for (const def of databaseToolDefinitions) toolHandlers.set(def.name, handleDatabaseTool);

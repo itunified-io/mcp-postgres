@@ -3,7 +3,6 @@ import { connectionToolDefinitions } from '../../src/tools/connection.js';
 import { queryToolDefinitions } from '../../src/tools/query.js';
 import { schemaToolDefinitions } from '../../src/tools/schema.js';
 import { crudToolDefinitions } from '../../src/tools/crud.js';
-import { dbaToolDefinitions } from '../../src/tools/dba.js';
 import { serverToolDefinitions } from '../../src/tools/server.js';
 import { replicationToolDefinitions } from '../../src/tools/replication.js';
 import { databaseToolDefinitions } from '../../src/tools/database.js';
@@ -13,15 +12,14 @@ const allTools = [
   ...queryToolDefinitions,
   ...schemaToolDefinitions,
   ...crudToolDefinitions,
-  ...dbaToolDefinitions,
   ...serverToolDefinitions,
   ...replicationToolDefinitions,
   ...databaseToolDefinitions,
 ];
 
 describe('Tool inventory', () => {
-  it('has exactly 40 tools', () => {
-    expect(allTools).toHaveLength(40);
+  it('has exactly 31 tools', () => {
+    expect(allTools).toHaveLength(31);
   });
 
   it('every tool has a name', () => {
@@ -57,7 +55,7 @@ describe('Tool inventory', () => {
 });
 
 describe('Destructive tool confirm gates', () => {
-  const destructiveTools = ['pg_update', 'pg_delete', 'pg_upsert', 'pg_vacuum', 'pg_reindex', 'pg_reload_config'];
+  const destructiveTools = ['pg_update', 'pg_delete', 'pg_upsert', 'pg_reload_config'];
 
   for (const toolName of destructiveTools) {
     it(`${toolName} has confirm in inputSchema properties`, () => {

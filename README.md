@@ -3,7 +3,7 @@
 [![AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
 [![npm](https://img.shields.io/npm/v/@itunified.io/mcp-postgres)](https://www.npmjs.com/package/@itunified.io/mcp-postgres)
 
-A comprehensive PostgreSQL MCP (Model Context Protocol) server providing 40+ tools for database management, monitoring, and administration.
+A comprehensive PostgreSQL MCP (Model Context Protocol) server providing 31 tools for database management, monitoring, and administration.
 
 ## Features
 
@@ -11,7 +11,6 @@ A comprehensive PostgreSQL MCP (Model Context Protocol) server providing 40+ too
 - **Query Execution** — parameterized queries, EXPLAIN ANALYZE, prepared statements
 - **Schema Introspection** — tables, indexes, constraints, views, functions, enums, extensions
 - **CRUD Operations** — type-safe insert, update, delete, upsert with injection protection
-- **DBA Monitoring** — pg_stat_activity, table/index stats, locks, cache hit ratio, bloat detection
 - **Server Management** — version, settings, config reload, uptime
 - **HA Monitoring** — replication status, slots, WAL status, standby detection (read-only)
 - **Database Sizing** — database and table sizes with index/toast breakdown
@@ -154,20 +153,6 @@ Add to your `settings.json`:
 | `pg_delete` | Delete rows (requires `confirm: true`) |
 | `pg_upsert` | Insert or update on conflict (requires `confirm: true`) |
 
-### DBA / Monitoring (9 tools)
-
-| Tool | Description |
-|------|-------------|
-| `pg_vacuum` | Run VACUUM on table |
-| `pg_analyze` | Run ANALYZE on table or database |
-| `pg_reindex` | Reindex table or index (requires `confirm: true`) |
-| `pg_stat_activity` | Show active queries, connections, wait events |
-| `pg_stat_tables` | Table-level stats: scans, inserts, dead tuples |
-| `pg_stat_indexes` | Index usage stats |
-| `pg_locks` | Current locks with blocking info |
-| `pg_cache_hit_ratio` | Buffer cache hit ratio |
-| `pg_bloat_check` | Estimate table/index bloat |
-
 ### Server (4 tools)
 
 | Tool | Description |
@@ -197,6 +182,7 @@ Add to your `settings.json`:
 
 For advanced PostgreSQL operations, **mcp-postgres-enterprise** extends this server with:
 
+- **DBA Monitoring** — VACUUM, ANALYZE, REINDEX, pg_stat_activity, table/index stats, locks, cache hit ratio, bloat detection
 - **CloudNativePG (CNPG)** — K8s cluster management, failover, switchover, backup orchestration
 - **HA Operations** — Replication slot management, PgBouncer pool control
 - **Backup / PITR** — pg_dump/pg_restore orchestration, point-in-time recovery
@@ -219,7 +205,6 @@ Available as a private GitHub package. Contact [itunified.io](https://github.com
 
 These tools require `confirm: true` to execute:
 - `pg_update`, `pg_delete`, `pg_upsert` — data modification
-- `pg_vacuum` (FULL mode), `pg_reindex` — maintenance
 - `pg_reload_config` — server configuration
 - `pg_query_explain` (analyze mode) — statement execution
 
