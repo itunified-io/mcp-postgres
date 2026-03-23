@@ -208,9 +208,25 @@ Available as a private GitHub package. Contact [itunified.io](https://github.com
 
 ## Security
 
-- All queries use parameterized placeholders (`$1`, `$2`, ...) — no SQL injection risk
-- Destructive operations (UPDATE, DELETE, VACUUM FULL, REINDEX, RELOAD) require `confirm: true`
-- Connection credentials are read from environment variables — never logged or stored
+### Query Safety Model
+
+- **CRUD tools** (`pg_insert`, `pg_update`, `pg_delete`, `pg_upsert`): All use parameterized queries (`$1`, `$2`, ...) — safe from SQL injection. Destructive operations require `confirm: true`.
+- **`pg_query`**: Unrestricted raw SQL runner by design — intended for power users who need full SQL flexibility. No injection protection is applied because the tool's purpose is to execute arbitrary SQL.
+- **`pg_query_explain`**: Defaults to safe `plan` mode (EXPLAIN only, no execution). `mode=analyze` always requires `confirm: true` because EXPLAIN ANALYZE executes the statement.
+- **`pg_query_prepared`**: **Deprecated.** Prepared statements are session-local in PostgreSQL and unreliable with connection pools. Statement names are validated as SQL identifiers. Use parameterized `pg_query` instead.
+
+### Destructive Operations
+
+These tools require `confirm: true` to execute:
+- `pg_update`, `pg_delete`, `pg_upsert` — data modification
+- `pg_vacuum` (FULL mode), `pg_reindex` — maintenance
+- `pg_reload_config` — server configuration
+- `pg_query_explain` (analyze mode) — statement execution
+
+### Credentials
+
+- Connection credentials are read from environment variables or JSON/YAML config — never logged or stored
+- All identifiers (table, column, schema names) are validated against a strict regex pattern
 
 ## License
 
