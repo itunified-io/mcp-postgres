@@ -1,29 +1,48 @@
 import type { PostgresClient } from '../client/postgres-client.js';
 
+/**
+ * Resolve profile name from args — accepts both `profile` (preferred) and
+ * `database` (deprecated, backward-compatible) parameters.
+ */
+function resolveProfile(args: Record<string, unknown>): string | undefined {
+  if (typeof args.profile === 'string') return args.profile;
+  if (typeof args.database === 'string') return args.database;
+  return undefined;
+}
+
 export const connectionToolDefinitions = [
   {
     name: 'pg_connect',
     description:
-      'Connect to a PostgreSQL database. If multiple databases are configured, specify which one. Otherwise connects to the default.',
+      'Connect to a PostgreSQL server profile. If multiple profiles are configured, specify which one. Otherwise connects to the default profile.',
     inputSchema: {
       type: 'object' as const,
       properties: {
+        profile: {
+          type: 'string',
+          description:
+            'Named connection profile from config file (optional, uses default if omitted). Each profile points to a PostgreSQL server instance.',
+        },
         database: {
           type: 'string',
-          description: 'Named database from config file (optional, uses default if omitted)',
+          description: 'Deprecated — use "profile" instead. Kept for backward compatibility.',
         },
       },
     },
   },
   {
     name: 'pg_disconnect',
-    description: 'Disconnect from a PostgreSQL database. Omit database to disconnect all.',
+    description: 'Disconnect from a PostgreSQL server profile. Omit profile to disconnect all.',
     inputSchema: {
       type: 'object' as const,
       properties: {
+        profile: {
+          type: 'string',
+          description: 'Named profile to disconnect (omit to disconnect all)',
+        },
         database: {
           type: 'string',
-          description: 'Named database to disconnect (omit to disconnect all)',
+          description: 'Deprecated — use "profile" instead.',
         },
       },
     },
@@ -31,35 +50,64 @@ export const connectionToolDefinitions = [
   {
     name: 'pg_connection_status',
     description:
-      'Check connection pool health for the active database or a specific named database.',
+      'Check connection pool health for the active profile or a specific named profile.',
     inputSchema: {
       type: 'object' as const,
       properties: {
+        profile: {
+          type: 'string',
+          description: 'Named profile (omit for active profile)',
+        },
         database: {
           type: 'string',
-          description: 'Named database (omit for active database)',
+          description: 'Deprecated — use "profile" instead.',
         },
       },
     },
   },
   {
     name: 'pg_list_connections',
-    description: 'List all configured databases and their connection status.',
+    description:
+      'List all configured connection profiles and their status. Each profile represents a PostgreSQL server instance (not a database within a server).',
     inputSchema: {
       type: 'object' as const,
       properties: {},
     },
   },
   {
+    name: 'pg_switch_profile',
+    description:
+      'Switch the active connection profile. All subsequent queries will use this profile unless overridden. Each profile targets a specific PostgreSQL server instance.',
+    inputSchema: {
+      type: 'object' as const,
+      properties: {
+        profile: {
+          type: 'string',
+          description: 'Named profile to switch to',
+        },
+        database: {
+          type: 'string',
+          description: 'Deprecated — use "profile" instead.',
+        },
+      },
+      required: ['profile'],
+    },
+  },
+  // Backward-compatible alias — keep for one release cycle
+  {
     name: 'pg_switch_database',
     description:
-      'Switch the active database context. All subsequent queries will use this database unless overridden.',
+      'Deprecated — use pg_switch_profile instead. Switch the active connection profile.',
     inputSchema: {
       type: 'object' as const,
       properties: {
         database: {
           type: 'string',
-          description: 'Named database to switch to',
+          description: 'Named profile to switch to (deprecated param name)',
+        },
+        profile: {
+          type: 'string',
+          description: 'Named profile to switch to',
         },
       },
       required: ['database'],
@@ -73,51 +121,62 @@ export async function handleConnectionTool(
   client: PostgresClient,
 ): Promise<{ content: Array<{ type: 'text'; text: string }> }> {
   try {
-    const database = typeof args.database === 'string' ? args.database : undefined;
+    const profile = resolveProfile(args);
 
     switch (name) {
       case 'pg_connect': {
-        await client.connect(database);
-        const dbName = database ?? client.getActiveDatabase();
+        await client.connect(profile);
+        const profileName = profile ?? client.getActiveDatabase();
         return {
-          content: [{ type: 'text', text: `Connected to '${dbName}' successfully.` }],
+          content: [
+            {
+              type: 'text',
+              text: `Connected to profile '${profileName}' successfully.`,
+            },
+          ],
         };
       }
 
       case 'pg_disconnect': {
-        await client.disconnect(database);
-        const msg = database
-          ? `Disconnected from '${database}'.`
-          : 'Disconnected from all databases.';
+        await client.disconnect(profile);
+        const msg = profile
+          ? `Disconnected from profile '${profile}'.`
+          : 'Disconnected from all profiles.';
         return { content: [{ type: 'text', text: msg }] };
       }
 
       case 'pg_connection_status': {
-        const status = await client.getPoolStatus(database);
+        const status = await client.getPoolStatus(profile);
         return { content: [{ type: 'text', text: JSON.stringify(status, null, 2) }] };
       }
 
       case 'pg_list_connections': {
-        const databases = client.getConfiguredDatabases();
+        const profiles = client.getConfiguredDatabases();
         const active = client.getActiveDatabase();
         const statuses = await Promise.all(
-          databases.map(async (db) => {
-            const status = await client.getPoolStatus(db);
-            return { ...status, active: db === active };
+          profiles.map(async (p) => {
+            const status = await client.getPoolStatus(p);
+            return { profile: p, ...status, active: p === active };
           }),
         );
         return { content: [{ type: 'text', text: JSON.stringify(statuses, null, 2) }] };
       }
 
+      case 'pg_switch_profile':
       case 'pg_switch_database': {
-        if (!database) {
+        if (!profile) {
           return {
-            content: [{ type: 'text', text: 'Error: database parameter is required.' }],
+            content: [{ type: 'text', text: 'Error: profile parameter is required.' }],
           };
         }
-        client.setActiveDatabase(database);
+        client.setActiveDatabase(profile);
         return {
-          content: [{ type: 'text', text: `Switched active database to '${database}'.` }],
+          content: [
+            {
+              type: 'text',
+              text: `Switched active profile to '${profile}'.`,
+            },
+          ],
         };
       }
 

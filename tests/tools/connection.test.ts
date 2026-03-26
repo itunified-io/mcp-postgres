@@ -26,8 +26,8 @@ function mockClient(overrides: Partial<PostgresClient> = {}): PostgresClient {
 }
 
 describe('Connection Tool Definitions', () => {
-  it('exports 5 tool definitions', () => {
-    expect(connectionToolDefinitions).toHaveLength(5);
+  it('exports 6 tool definitions (includes deprecated pg_switch_database alias)', () => {
+    expect(connectionToolDefinitions).toHaveLength(6);
   });
 
   it('all tools have pg_ prefix', () => {
@@ -96,18 +96,60 @@ describe('handleConnectionTool', () => {
   });
 
   describe('pg_list_connections', () => {
-    it('lists all configured databases', async () => {
+    it('lists all configured profiles with profile field', async () => {
       const client = mockClient();
       const result = await handleConnectionTool('pg_list_connections', {}, client);
       const parsed = JSON.parse(result.content[0].text);
       expect(parsed).toHaveLength(2);
-      expect(parsed[0].database).toBe('default');
+      expect(parsed[0].profile).toBe('default');
       expect(parsed[0].active).toBe(true);
     });
   });
 
-  describe('pg_switch_database', () => {
-    it('switches active database', async () => {
+  describe('pg_switch_profile', () => {
+    it('switches active profile', async () => {
+      const client = mockClient();
+      const result = await handleConnectionTool(
+        'pg_switch_profile',
+        { profile: 'analytics' },
+        client,
+      );
+      expect(result.content[0].text).toContain('analytics');
+      expect(client.setActiveDatabase).toHaveBeenCalledWith('analytics');
+    });
+
+    it('returns error when profile not specified', async () => {
+      const client = mockClient();
+      const result = await handleConnectionTool('pg_switch_profile', {}, client);
+      expect(result.content[0].text).toContain('Error');
+    });
+  });
+
+  describe('pg_connect with profile param', () => {
+    it('connects using profile parameter (preferred)', async () => {
+      const client = mockClient();
+      const result = await handleConnectionTool(
+        'pg_connect',
+        { profile: 'analytics' },
+        client,
+      );
+      expect(result.content[0].text).toContain('analytics');
+      expect(client.connect).toHaveBeenCalledWith('analytics');
+    });
+
+    it('prefers profile over database when both provided', async () => {
+      const client = mockClient();
+      await handleConnectionTool(
+        'pg_connect',
+        { profile: 'analytics', database: 'other' },
+        client,
+      );
+      expect(client.connect).toHaveBeenCalledWith('analytics');
+    });
+  });
+
+  describe('pg_switch_database (deprecated alias)', () => {
+    it('still works with database param', async () => {
       const client = mockClient();
       const result = await handleConnectionTool(
         'pg_switch_database',
@@ -116,12 +158,6 @@ describe('handleConnectionTool', () => {
       );
       expect(result.content[0].text).toContain('analytics');
       expect(client.setActiveDatabase).toHaveBeenCalledWith('analytics');
-    });
-
-    it('returns error when database not specified', async () => {
-      const client = mockClient();
-      const result = await handleConnectionTool('pg_switch_database', {}, client);
-      expect(result.content[0].text).toContain('Error');
     });
   });
 });

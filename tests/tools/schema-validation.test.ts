@@ -16,8 +16,8 @@ const allTools = [
 ];
 
 describe('Tool inventory', () => {
-  it('has exactly 27 tools', () => {
-    expect(allTools).toHaveLength(27);
+  it('has exactly 28 tools (27 + deprecated pg_switch_database alias)', () => {
+    expect(allTools).toHaveLength(28);
   });
 
   it('every tool has a name', () => {
