@@ -1,6 +1,6 @@
 {
   "name": "@itunified.io/mcp-postgres",
-  "version": "2026.4.10-1",
+  "version": "2026.4.10-2",
   "description": "PostgreSQL MCP Server — 27 tools for schema introspection, queries, CRUD, and server management via Model Context Protocol",
   "type": "module",
   "main": "dist/index.js",
@@ -16,7 +16,15 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm test && node scripts/prepublish-check.js"
   },
-  "keywords": ["mcp", "postgres", "postgresql", "database", "dba", "monitoring", "model-context-protocol"],
+  "keywords": [
+    "mcp",
+    "postgres",
+    "postgresql",
+    "database",
+    "dba",
+    "monitoring",
+    "model-context-protocol"
+  ],
   "author": "itunified.io",
   "license": "AGPL-3.0-only",
   "mcpName": "io.github.itunified-io/postgres",
@@ -24,7 +32,9 @@
     "type": "git",
     "url": "https://github.com/itunified-io/mcp-postgres.git"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.0",
     "pg": "^8.13.0",
