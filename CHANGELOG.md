@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2026.04.10.3
+
+- **refactor: migrate from native pg driver to dbx execFile("dbxcli") pattern**
+  - Replace native `pg` (node-postgres) driver with thin MCP adapter layer
+  - Add `src/executor.ts` — `dbxExec()` calls `dbxcli` via `execFile` (no shell, no injection)
+  - Add `src/runtime.ts` — `McpRuntime` with stdio + SSE transport support
+  - Add `src/plugin.ts` — `DbxPlugin` interface with automatic tool registration
+  - New `src/tools.ts` — all 27 tool definitions as `ToolDefinition[]` with Zod schemas
+  - Rewrite `src/index.ts` to match Oracle adapter pattern (createMcpRuntime + createPlugin)
+  - Remove `src/client/` (PostgresClient, native pg driver)
+  - Remove `src/config/` (config-loader, vault-loader)
+  - Remove `src/utils/` (validation, errors)
+  - Remove `src/tools/` (old per-domain tool handlers)
+  - Remove `pg` and `@types/pg` dependencies
+  - All tool names preserved for backward compatibility
+  - Connection parameter `profile` replaced by `target` (maps to `~/.dbx/targets/`)
+
 ## v2026.04.10.2
 
 - **feat: add opportunistic Vault AppRole secret loading** (#7)
