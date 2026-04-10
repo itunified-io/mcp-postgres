@@ -5,6 +5,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import { loadFromVault } from './config/vault-loader.js';
 import { PostgresClient } from './client/postgres-client.js';
 import { connectionToolDefinitions, handleConnectionTool } from './tools/connection.js';
 import { queryToolDefinitions, handleQueryTool } from './tools/query.js';
@@ -33,6 +34,19 @@ for (const def of schemaToolDefinitions) toolHandlers.set(def.name, handleSchema
 for (const def of crudToolDefinitions) toolHandlers.set(def.name, handleCrudTool);
 for (const def of serverToolDefinitions) toolHandlers.set(def.name, handleServerTool);
 for (const def of databaseToolDefinitions) toolHandlers.set(def.name, handleDatabaseTool);
+
+// --- Vault → env vars (opportunistic, before any PG config loading) ---
+await loadFromVault({
+  kvPath: 'postgres/nas-keycloak',
+  mapping: {
+    connection_string: 'POSTGRES_CONNECTION_STRING',
+    host: 'PGHOST',
+    port: 'PGPORT',
+    user: 'PGUSER',
+    password: 'PGPASSWORD',
+    database: 'PGDATABASE',
+  },
+});
 
 const server = new Server(
   { name: 'mcp-postgres', version: '2026.4.10-1' },

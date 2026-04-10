@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v2026.04.10.2
+
+- **feat: add opportunistic Vault AppRole secret loading** (#7)
+  - New `src/config/vault-loader.ts` — loads PG credentials from HashiCorp Vault KV v2
+  - Wired into `index.ts` — runs before `PostgresClient.fromEnv()`
+  - Maps: `connection_string` → `POSTGRES_CONNECTION_STRING`, `host/port/user/password/database` → `PG*` vars
+  - Silent no-op when Vault is not configured — existing env var / config file flows unchanged
+  - 15 unit tests covering skip, load, no-overwrite, error handling
+  - README updated with comprehensive Vault integration guide
+
 ## v2026.04.10.1
 
 - **chore: MCP Registry listing** (#6)
