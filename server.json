@@ -1,0 +1,31 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.itunified-io/postgres",
+  "title": "PostgreSQL MCP Server",
+  "description": "PostgreSQL MCP Server — 27 tools for queries, schema, CRUD, DBA, HA & server management",
+  "version": "2026.3.23",
+  "repository": {
+    "url": "https://github.com/itunified-io/mcp-postgres",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@itunified.io/mcp-postgres",
+      "version": "2026.3.23-2",
+      "runtimeHint": "npx",
+      "runtimeArguments": [],
+      "packageArguments": [],
+      "environmentVariables": [
+        {
+          "name": "POSTGRES_CONNECTION_STRING",
+          "description": "PostgreSQL connection string (e.g. postgresql://user:pass@host:5432/db)",
+          "required": true
+        }
+      ],
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
