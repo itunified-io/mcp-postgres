@@ -1,6 +1,6 @@
 {
   "name": "@itunified.io/mcp-postgres",
-  "version": "2026.4.10-2",
+  "version": "2026.4.10-3",
   "description": "PostgreSQL MCP Server — 27 tools for schema introspection, queries, CRUD, and server management via Model Context Protocol",
   "type": "module",
   "main": "dist/index.js",
@@ -37,12 +37,10 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.24.0",
-    "pg": "^8.13.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
-    "@types/pg": "^8.11.0",
     "typescript": "^5.5.0",
     "vitest": "^2.0.0"
   }
