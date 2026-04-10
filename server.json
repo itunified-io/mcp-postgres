@@ -3,7 +3,7 @@
   "name": "io.github.itunified-io/postgres",
   "title": "PostgreSQL MCP Server",
   "description": "PostgreSQL MCP Server — 27 tools for queries, schema, CRUD, DBA, HA & server management",
-  "version": "2026.3.23",
+  "version": "2026.4.10",
   "repository": {
     "url": "https://github.com/itunified-io/mcp-postgres",
     "source": "github"
@@ -12,7 +12,7 @@
     {
       "registryType": "npm",
       "identifier": "@itunified.io/mcp-postgres",
-      "version": "2026.3.23-2",
+      "version": "2026.4.10-1",
       "runtimeHint": "npx",
       "runtimeArguments": [],
       "packageArguments": [],

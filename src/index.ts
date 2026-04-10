@@ -35,7 +35,7 @@ for (const def of serverToolDefinitions) toolHandlers.set(def.name, handleServer
 for (const def of databaseToolDefinitions) toolHandlers.set(def.name, handleDatabaseTool);
 
 const server = new Server(
-  { name: 'mcp-postgres', version: '2026.3.19.1' },
+  { name: 'mcp-postgres', version: '2026.4.10-1' },
   { capabilities: { tools: {} } },
 );
 
